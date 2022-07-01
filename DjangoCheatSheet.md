@@ -44,7 +44,7 @@
       基本的に`path('xxx/',include('YYY.urls')),`の形でそれぞれのアプリ毎のurls.pyへ仲介する
       * アプリ名/urls.pyについて<br>
       config/urls.pyで拾った後のURLに対応するルーティングを行う<br>
-      設定として`app_name = 'アプリ名'`の記述が必要
+      設定として`app_name = 'アプリ名'`の記述が必要<br>
       基本的に`path('xxx/','views.クラス名.as_view()',name='紐づける名前')),`の形<br><br>
 
    2. viewsを書こう<br>
@@ -66,7 +66,7 @@
       * 各汎用ビューのtips
          * 全体的に<br>
             * `template_name`は設定しないと決まった命名規則で設定される。<br>
-            * `model = モデル名`で自動的に作られるレコードは`template`では、単数なら`object`、複数なら`object_list`に格納される。<br>
+            * `model = モデル名`で自動的に作られるレコードは`template`では、単数なら`object`、複数なら`object_list`、または`モデル名`、`モデル名_list`に格納される。<br>
             一応view内で`context_object_name = '変数名'`で格納される変数名を指定できる<br>
 
             * GETまたはPOSTで得られるデータの取り出し<br>
@@ -79,30 +79,32 @@
                def get_queryset(self):
                   records = 検索対象のモデル名.object.all()
                   records = records.filter(カラム名__icontains=検索に用いる値)
-
                ```
 
 
             * 値の受け渡しは以下のように`context`で渡す。
                ```python
                def get_context_data(self, **kwargs):
-               context = super().get_context_data(**kwargs)
-               context['xxx'] = "yyyy"
-               return context
+                  context = super().get_context_data(**kwargs)
+                  context['xxx'] = "yyyy"
+                  return context
                ```
          * `CreateView`<br>
          入力成功後の移動先は`success_url`で指定<br>
          入力されたフォームがバリデーションを通過した（書き込み成功）ときの処理は
+
             ```python
             def form_valid(self,form):
-            #処理を書く
-            return super().form_valid(form)
+               #処理を書く
+               return super().form_valid(form)
             ```
+
             失敗した（合わないデータの入力時）は
-            ```pyrhon
-            def form_invalid(self, form):
-            #処理を書く
-            return super().form_invalid(form)
+
+            ```python
+            def form_invalid(self,form):
+               #処理を書く
+               return super().form_invalid(form)
             ```
 
          * `DetailView`<br>
@@ -172,7 +174,7 @@
      * `{% if %} {% elif %} {% else %} {% endif %}`if文
      * `{% now %}`現在時刻
 
-   6. アカウント昨日の実装について
+   6. アカウント機能の実装について
       * Djangoには`User`モデルと`UserCreationForm`が用意されており、それを`CreationView`を継承したviewに設定すればよい。<br>また、データの格納先はデータベースのauth_userテーブル
 
       * `User`モデルには、ほかに`AbstractUser`と`AbstractBaseUser`があり、オリジナルのテーブルを作る場合はこちらを継承して作る。<br>
@@ -186,6 +188,20 @@
 
          加えて、自分でユーザーモデルを作ったときには、`BaseUserManager`を継承したクラスも作る必要がある。これを継承して作ったユーザーモデルで呼び出す。
 
-      * フォームは継承で書き換えることができる。<br><br>
+      * フォームは継承で書き換えることができる。<br><br> 
+
+      * login/logoutについて
+         * `LoginView`,`LogoutView`が用意されてる。
+         * ログイン状態でないと見れないページを設定するにはurls.pyのパスに`login_required()`を追加する<br>
+            ```python
+            path('xxx/',login_required(views.クラス名.as_view()),name="xxx"),
+            ```
+            加えて、setting.pyにログインページURLと認証時遷移先URLを登録する。
+            ```python
+               LOGIN_URL = 'xxx'
+               LOGIN_REDIRECT_URL = 'xxx'
+            ```
+
+
 
 ## エラーと原因・対応
